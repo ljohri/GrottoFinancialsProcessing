@@ -154,7 +154,7 @@ Row 6+:  One row per year (e.g. "2025(As of ...)")
 
 ### 5. Expense Notes (optional)
 
-**Filename:** `output/Expense Notes.txt`
+**Filename:** `docs/input_docs/2025/Expense Notes.txt`
 
 Provides human-readable annotations for major expenses. These notes appear in:
 - The **Major Expenses** table in all report formats
@@ -254,9 +254,9 @@ sfbc_accounts/
 │           ├── Chase9010_Activity_*.CSV
 │           ├── paypal.CSV
 │           ├── Fidelity Portfolio_Positions_*.csv
-│           └── Investment_income*.xlsx
+│           ├── Investment_income*.xlsx
+│           └── Expense Notes.txt
 └── output/
-    ├── Expense Notes.txt
     ├── 2025_budget_report.md
     ├── 2025_budget_report.pdf
     ├── 2025_budget_report.docx
