@@ -1,0 +1,28 @@
+# Generated outputs — excluded from version control
+output/
+
+# Input financial data — excluded to protect sensitive data
+docs/input_docs/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.cursor/
+.vscode/
+*.swp
+*.swo
