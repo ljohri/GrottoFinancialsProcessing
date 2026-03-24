@@ -17,7 +17,7 @@ from transform import transform
 
 DATA_DIR    = "docs/input_docs/2025"
 OUTPUT_DIR  = "output"
-NOTES_PATH  = "output/Expense Notes.txt"
+NOTES_PATH  = "docs/input_docs/2025/Expense Notes.txt"
 REPORT_MD   = f"{OUTPUT_DIR}/2025_budget_report.md"
 REPORT_PDF  = f"{OUTPUT_DIR}/2025_budget_report.pdf"
 REPORT_DOCX = f"{OUTPUT_DIR}/2025_budget_report.docx"
