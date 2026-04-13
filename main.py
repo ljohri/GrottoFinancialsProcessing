@@ -4,8 +4,17 @@ Run:
     uv run python main.py
 """
 
+import os
+
 from categorize import categorize
 from charts import generate_charts
+from config import (
+    ANALYSIS_END,
+    ANALYSIS_START,
+    DATA_DIR,
+    OUTPUT_DIR,
+    REPORT_PERIOD_LABEL,
+)
 from docx_export import export_docx
 from expense_notes import load_expense_notes
 from fidelity import (analyze_fidelity, analyze_investment_income,
@@ -15,16 +24,14 @@ from pdf_export import export_pdf
 from report import export_markdown, generate_report
 from transform import transform
 
-DATA_DIR    = "docs/input_docs/2025"
-OUTPUT_DIR  = "output"
-NOTES_PATH  = "docs/input_docs/2025/Expense Notes.txt"
-REPORT_MD   = f"{OUTPUT_DIR}/2025_budget_report.md"
+NOTES_PATH  = os.path.join(DATA_DIR, "Expense Notes.txt")
+REPORT_MD   = os.path.join(OUTPUT_DIR, "2025_budget_report.md")
 REPORT_PDF  = f"{OUTPUT_DIR}/2025_budget_report.pdf"
 REPORT_DOCX = f"{OUTPUT_DIR}/2025_budget_report.docx"
 
 
 def main() -> None:
-    print("=== SFBC 2025 Budget Report Generator ===\n")
+    print(f"=== SFBC {REPORT_PERIOD_LABEL} Budget Report Generator ===\n")
 
     # --- Expense notes ---
     print("[0/6] Loading expense notes...")
@@ -37,7 +44,10 @@ def main() -> None:
     print(f"  Raw rows loaded: {len(data)}\n")
 
     # --- Transform ---
-    print("[2/6] Transforming and filtering to 2025...")
+    print(
+        f"[2/6] Transforming and filtering to {ANALYSIS_START}–{ANALYSIS_END} "
+        f"({REPORT_PERIOD_LABEL})..."
+    )
     clean = transform(data)
     print()
 
@@ -71,7 +81,11 @@ def main() -> None:
     # --- Investment income xlsx ---
     print("[5c] Analyzing investment income...")
     inv_path = find_investment_income_path(DATA_DIR)
-    investment_data = analyze_investment_income(inv_path) if inv_path else {}
+    investment_data = (
+        analyze_investment_income(inv_path, target_year=ANALYSIS_END.year)
+        if inv_path
+        else {}
+    )
     print()
 
     # --- Export ---

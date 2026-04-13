@@ -19,11 +19,9 @@ from tabulate import tabulate
 
 from anonymize import anonymize
 from categorize import categorize
+from config import DATA_DIR, OUTPUT_DIR
 from load_data import load_all_data
 from transform import transform
-
-DATA_DIR   = "docs/input_docs/2025"
-OUTPUT_DIR = "output"
 
 INCOME_CATEGORIES = {"membership_income", "donation_income"}
 

@@ -1,10 +1,12 @@
-"""Clean and normalize the unified dataframe: parse dates, amounts, add year/month, filter to 2025."""
+"""Clean and normalize the unified dataframe: parse dates, amounts, add year/month, filter by analysis dates."""
 
 import pandas as pd
 
+from config import ANALYSIS_END, ANALYSIS_START
+
 
 def transform(df: pd.DataFrame) -> pd.DataFrame:
-    """Return a cleaned dataframe filtered to 2025 transactions only."""
+    """Return a cleaned dataframe filtered to `ANALYSIS_START`–`ANALYSIS_END` (inclusive) from config / `.env`."""
     df = df.copy()
 
     # Parse dates — PayPal and Chase both use MM/DD/YYYY
@@ -35,8 +37,12 @@ def transform(df: pd.DataFrame) -> pd.DataFrame:
     df["month"] = df["date"].dt.month
     df["month_name"] = df["date"].dt.strftime("%B")
 
-    # Filter to 2025 only
-    df_2025 = df[df["year"] == 2025].copy()
-    print(f"  Rows after 2025 filter: {len(df_2025)} (from {len(df)} total)")
+    d = df["date"].dt.date
+    mask = (d >= ANALYSIS_START) & (d <= ANALYSIS_END)
+    df_out = df[mask].copy()
+    print(
+        f"  Rows after date filter {ANALYSIS_START}–{ANALYSIS_END}: "
+        f"{len(df_out)} (from {len(df)} total)"
+    )
 
-    return df_2025.reset_index(drop=True)
+    return df_out.reset_index(drop=True)

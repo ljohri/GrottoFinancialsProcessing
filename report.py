@@ -7,6 +7,7 @@ import pandas as pd
 from tabulate import tabulate
 
 from anonymize import anonymize
+from config import ANALYSIS_END, ANALYSIS_START, DATA_DIR, REPORT_PERIOD_LABEL
 from expense_notes import lookup_note
 
 MAJOR_EXPENSE_THRESHOLD = 50.0
@@ -155,6 +156,9 @@ def generate_report(df: pd.DataFrame, expense_notes: dict | None = None) -> dict
         "zelle_out":         zelle_out_df,
         "transfers":         transfers,
         "paypal_has_2025_data": paypal_gross_total > 0 or total_paypal_fees > 0,
+        "period_label": REPORT_PERIOD_LABEL,
+        "analysis_start": ANALYSIS_START,
+        "analysis_end": ANALYSIS_END,
     }
 
 
@@ -180,8 +184,10 @@ def export_markdown(
     inv = investment_data or {}
     generated = date.today().strftime("%B %d, %Y")
 
+    pl = r["period_label"]
+    inv_year = ANALYSIS_END.year  # calendar row / labels for Fidelity investment-income xlsx
     lines = [
-        "# SFBC 2025 Budget Report",
+        f"# SFBC {pl} Budget Report",
         "",
         f"_Generated: {generated}_",
         "",
@@ -240,10 +246,11 @@ def export_markdown(
         ]
         lines.append(tabulate(paypal_rows, headers=["Item", "Amount"], tablefmt="pipe"))
     else:
+        a0, a1 = r["analysis_start"], r["analysis_end"]
         lines += [
-            "> **Note:** The `paypal.CSV` export on file contains 2026 transactions.",
-            "> PayPal 2025 figures are $0.00. Replace `docs/input_docs/2025/paypal.CSV`",
-            "> with an export filtered to Jan–Dec 2025.",
+            "> **Note:** No completed PayPal income was found for this period (or amounts net to zero).",
+            f"> Check `{os.path.join(DATA_DIR, 'paypal.CSV')}` has **Completed** rows with dates from "
+            f"{a0} through {a1}.",
         ]
 
     # --- Fidelity Investments ---
@@ -256,14 +263,14 @@ def export_markdown(
         # Annual performance from xlsx
         if inv:
             perf_rows = [
-                ["Beginning Balance (Jan 1, 2025)",  f"${inv['beginning_balance']:,.2f}"],
+                [f"Beginning Balance (Jan 1, {inv_year})",  f"${inv['beginning_balance']:,.2f}"],
                 ["Market Change",                    f"${inv['market_change']:+,.2f}"],
                 ["Dividends",                        f"${inv['dividends']:,.2f}"],
-                ["Ending Balance (Dec 31, 2025)",    f"${inv['ending_balance']:,.2f}"],
+                [f"Ending Balance (Dec 31, {inv_year})",    f"${inv['ending_balance']:,.2f}"],
                 ["**Total Return ($)**",             f"**${inv['total_return']:+,.2f}**"],
                 ["**Total Return (%)**",             f"**{inv['return_pct']:+.2f}%**"],
             ]
-            lines += ["### 2025 Annual Performance", ""]
+            lines += [f"### {inv_year} Annual Performance", ""]
             lines.append(tabulate(perf_rows, headers=["Metric", "Value"], tablefmt="pipe"))
             lines += [""]
 
@@ -293,9 +300,11 @@ def export_markdown(
         "", "---", "", "## Notes", "",
         "- **Internal transfers excluded:** PayPal <-> Chase ACH transfers are detected and",
         "  excluded from all income/expense totals to avoid double-counting.",
-        "- **2025 filter:** Only transactions with a posting date in calendar year 2025 are included.",
+        f"- **Date range:** Only transactions with posting dates from **{r['analysis_start']}** "
+        f"through **{r['analysis_end']}** (inclusive) are included.",
         "- **PayPal fees:** PayPal processing fees are tracked separately and excluded from income.",
-        "- **Donation threshold:** Credits above $100 (or matching donation keywords) are classified as donations.",
+        "- **Income classification:** Donations are detected by keywords in the transaction",
+        "  description (e.g. donation, benevity). Other positive credits are treated as membership income.",
         "- **Major expenses:** Expenses >= $50 are listed with notes in the Major Expenses section.",
         "- **Name redaction:** Personal names in transaction descriptions have been anonymized.",
         "- **Fidelity:** Portfolio positions are as of the CSV export date and are not mixed",

@@ -1,6 +1,9 @@
 # Generated outputs — excluded from version control
 output/
 
+# Local path overrides
+.env
+
 # Input financial data — excluded to protect sensitive data
 docs/input_docs/
 

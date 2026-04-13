@@ -5,6 +5,8 @@ from datetime import date
 
 from fpdf import FPDF, XPos, YPos
 
+from config import ANALYSIS_END
+
 # ---------------------------------------------------------------------------
 # Styling constants
 # ---------------------------------------------------------------------------
@@ -52,7 +54,7 @@ class BudgetPDF(FPDF):
             return
         self.set_font(FONT, "I", 8)
         self.set_text_color(*C_RULE)
-        self.cell(0, 5, "SFBC 2025 Budget Report", align="L")
+        self.cell(0, 5, _safe(f"SFBC {getattr(self, '_period_label', '2025')} Budget Report"), align="L")
         self.set_xy(MARGIN, self.get_y())
         self.cell(0, 5, f"Page {self.page_no()}", align="R",
                   new_x=XPos.LMARGIN, new_y=YPos.NEXT)
@@ -190,7 +192,10 @@ def export_pdf(
     r   = report_data
     f   = fidelity_data
     inv = investment_data or {}
+    inv_year = ANALYSIS_END.year
+    pl  = r.get("period_label", str(inv_year))
     pdf = BudgetPDF()
+    pdf._period_label = pl
 
     # ---- Cover / title ------------------------------------------------
     pdf.add_page()
@@ -199,7 +204,7 @@ def export_pdf(
     pdf.set_text_color(*C_ACCENT)
     pdf.cell(0, 12, "SFBC", align="C", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font(FONT, "B", 18)
-    pdf.cell(0, 10, "2025 Budget Report", align="C",
+    pdf.cell(0, 10, _safe(f"{pl} Budget Report"), align="C",
              new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.set_font(FONT, "", 10)
     pdf.set_text_color(*C_RULE)
@@ -285,7 +290,9 @@ def export_pdf(
             wrap_last=True,
         )
     else:
-        pdf._body("No outgoing Zelle payments in 2025.")
+        pdf._body(
+            f"No outgoing Zelle payments between {r['analysis_start']} and {r['analysis_end']}."
+        )
 
     # All itemized
     pdf._h3("All Itemized Expenses")
@@ -308,8 +315,8 @@ def export_pdf(
                    [120, CW - 120], ["L", "R"])
     else:
         pdf._body(
-            "Note: The paypal.CSV export on file contains 2026 transactions. "
-            "PayPal 2025 figures are $0.00."
+            f"No completed PayPal income for {r['analysis_start']}–{r['analysis_end']}, "
+            "or amounts net to zero. Confirm paypal.CSV has Completed rows in that date range."
         )
 
     # ---- Fidelity investments -------------------------------------------
@@ -321,15 +328,15 @@ def export_pdf(
 
         # Annual performance table
         if inv:
-            pdf._h3("2025 Annual Investment Performance")
+            pdf._h3(f"{inv_year} Annual Investment Performance")
             ret    = inv["total_return"]
             ret_pct = inv["return_pct"]
             v_color = C_POS if ret >= 0 else C_NEG
             perf_rows = [
-                ["Beginning Balance (Jan 1, 2025)",  f"${inv['beginning_balance']:,.2f}"],
+                [f"Beginning Balance (Jan 1, {inv_year})",  f"${inv['beginning_balance']:,.2f}"],
                 ["Market Change",                    f"${inv['market_change']:+,.2f}"],
                 ["Dividends",                        f"${inv['dividends']:,.2f}"],
-                ["Ending Balance (Dec 31, 2025)",    f"${inv['ending_balance']:,.2f}"],
+                [f"Ending Balance (Dec 31, {inv_year})",    f"${inv['ending_balance']:,.2f}"],
                 ["Total Return ($)",                 f"${ret:+,.2f}"],
                 ["Total Return (%)",                 f"{ret_pct:+.2f}%"],
             ]
@@ -370,9 +377,9 @@ def export_pdf(
     notes = [
         "Internal transfers excluded: PayPal <-> Chase ACH transfers are detected and "
         "excluded from all income/expense totals to avoid double-counting.",
-        "2025 filter: Only transactions with a posting date in calendar year 2025 are included.",
+        f"Date range: posting dates from {r['analysis_start']} through {r['analysis_end']} (inclusive).",
         "PayPal fees: PayPal processing fees are tracked separately and excluded from income.",
-        "Donation threshold: Credits above $100 (or matching donation keywords) are classified as donations.",
+        "Donations: credits whose description matches donation-related keywords; other income is membership.",
         "Major expenses: Expenses >= $50 are listed with annotated notes in the Major Expenses section.",
         "Name redaction: Personal names in transaction descriptions have been anonymized.",
         "Fidelity: Portfolio positions are as of the CSV export date and are not mixed "

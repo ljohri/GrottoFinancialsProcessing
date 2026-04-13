@@ -4,6 +4,7 @@ import io
 import os
 from datetime import date
 
+from config import ANALYSIS_END
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
@@ -178,11 +179,13 @@ def export_docx(
     r   = report_data
     f   = fidelity_data
     inv = investment_data or {}
+    inv_year = ANALYSIS_END.year
+    pl  = r.get("period_label", str(inv_year))
     doc = Document()
     generated = date.today().strftime("%B %d, %Y")
 
     # ---- Title -------------------------------------------------------------
-    title = doc.add_heading("SFBC 2025 Budget Report", 0)
+    title = doc.add_heading(f"SFBC {pl} Budget Report", 0)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     for run in title.runs:
         run.font.color.rgb = ACCENT
@@ -260,7 +263,11 @@ def export_docx(
                    zo.values.tolist(),
                    [0.9, 2.2, 0.9, 2.0], ["left", "left", "right", "left"])
     else:
-        _para(doc, "No outgoing Zelle payments in 2025.", italic=True)
+        _para(
+            doc,
+            f"No outgoing Zelle payments between {r['analysis_start']} and {r['analysis_end']}.",
+            italic=True,
+        )
 
     _heading(doc, "All Itemized Expenses", 2)
     ei = r["expense_items"]
@@ -280,8 +287,8 @@ def export_docx(
                    [3.5, 1.5], ["left", "right"])
     else:
         _para(doc,
-              "Note: The paypal.CSV export on file contains 2026 transactions. "
-              "PayPal 2025 figures are $0.00.",
+              f"No completed PayPal income for {r['analysis_start']}–{r['analysis_end']}, "
+              "or amounts net to zero. Confirm paypal.CSV has Completed rows in that range.",
               italic=True)
 
     # ---- Fidelity Investments ----------------------------------------------
@@ -293,15 +300,15 @@ def export_docx(
         doc.add_paragraph()
 
         if inv:
-            _heading(doc, "2025 Annual Investment Performance", 2)
+            _heading(doc, f"{inv_year} Annual Investment Performance", 2)
             ret     = inv["total_return"]
             ret_pct = inv["return_pct"]
             v_color = POS_CLR if ret >= 0 else NEG_CLR
             perf_rows = [
-                ["Beginning Balance (Jan 1, 2025)",  f"${inv['beginning_balance']:,.2f}"],
+                [f"Beginning Balance (Jan 1, {inv_year})",  f"${inv['beginning_balance']:,.2f}"],
                 ["Market Change",                    f"${inv['market_change']:+,.2f}"],
                 ["Dividends",                        f"${inv['dividends']:,.2f}"],
-                ["Ending Balance (Dec 31, 2025)",    f"${inv['ending_balance']:,.2f}"],
+                [f"Ending Balance (Dec 31, {inv_year})",    f"${inv['ending_balance']:,.2f}"],
                 ["Total Return ($)",                 f"${ret:+,.2f}"],
                 ["Total Return (%)",                 f"{ret_pct:+.2f}%"],
             ]
@@ -338,9 +345,9 @@ def export_docx(
     notes = [
         "Internal transfers excluded: PayPal <-> Chase ACH transfers are detected "
         "and excluded from all totals to avoid double-counting.",
-        "2025 filter: Only transactions dated within calendar year 2025 are included.",
+        f"Date range: posting dates from {r['analysis_start']} through {r['analysis_end']} (inclusive).",
         "PayPal fees: Tracked separately and excluded from income.",
-        "Donation threshold: Credits >= $100 or matching donation keywords are classified as donations.",
+        "Donations: credits whose description matches donation-related keywords; other income is membership.",
         "Major expenses: Expenses >= $50 are annotated in the Major Expenses section.",
         "Name redaction: Personal names in transaction descriptions have been anonymized.",
         "Fidelity: Portfolio positions are as of the CSV export date; not mixed into operating figures.",

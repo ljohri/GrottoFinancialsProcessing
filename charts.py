@@ -10,6 +10,8 @@ import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 
+from config import REPORT_PERIOD_LABEL
+
 MONTH_ORDER = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
@@ -49,7 +51,7 @@ def generate_charts(df: pd.DataFrame, out_dir: str, expense_notes: dict | None =
         )
 
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(_dollar_fmt))
-    ax.set_title("SFBC 2025 — Income vs Expenses", fontsize=14, fontweight="bold", pad=12)
+    ax.set_title(f"SFBC {REPORT_PERIOD_LABEL} — Income vs Expenses", fontsize=14, fontweight="bold", pad=12)
     ax.set_ylabel("Amount (USD)")
     ax.spines[["top", "right"]].set_visible(False)
     ax.yaxis.grid(True, linestyle="--", alpha=0.5)
@@ -94,7 +96,7 @@ def generate_charts(df: pd.DataFrame, out_dir: str, expense_notes: dict | None =
         ax.set_xticks(list(x))
         ax.set_xticklabels(short_months)
         ax.yaxis.set_major_formatter(mticker.FuncFormatter(_dollar_fmt))
-        ax.set_title("SFBC 2025 — Monthly Cash Flow", fontsize=14, fontweight="bold", pad=12)
+        ax.set_title(f"SFBC {REPORT_PERIOD_LABEL} — Monthly Cash Flow", fontsize=14, fontweight="bold", pad=12)
         ax.set_ylabel("Amount (USD)")
         ax.legend()
         ax.spines[["top", "right"]].set_visible(False)
@@ -158,7 +160,7 @@ def generate_charts(df: pd.DataFrame, out_dir: str, expense_notes: dict | None =
         )
         for at in autotexts:
             at.set_fontsize(9)
-        ax.set_title("SFBC 2025 — Expense Breakdown", fontsize=14, fontweight="bold", pad=12)
+        ax.set_title(f"SFBC {REPORT_PERIOD_LABEL} — Expense Breakdown", fontsize=14, fontweight="bold", pad=12)
         fig.tight_layout()
 
         path3 = os.path.join(out_dir, "chart_expense_breakdown.png")

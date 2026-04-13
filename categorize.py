@@ -1,4 +1,9 @@
-"""Assign a category to each transaction row."""
+"""Assign a category to each transaction row.
+
+Positive credits default to membership income. Donations are recognized only when
+the description matches _DONATION_KEYWORDS — membership dues are often over $100,
+so amount is not used to infer donations.
+"""
 
 import pandas as pd
 
@@ -16,10 +21,6 @@ _DONATION_KEYWORDS = [
     "giv1",
     "fcauses",
 ]
-
-# Dollar threshold above which an unlabelled income is treated as a donation
-_DONATION_AMOUNT_THRESHOLD = 100.0
-
 
 def _classify_row(row: pd.Series) -> str:
     source: str = row["source"]
@@ -46,11 +47,11 @@ def _classify_row(row: pd.Series) -> str:
     if amount < 0:
         return "expense"
 
-    # --- Donation income: keyword match or large one-off amount ---
-    if any(kw in desc for kw in _DONATION_KEYWORDS) or amount > _DONATION_AMOUNT_THRESHOLD:
+    # --- Donation income: keywords only (dues are often > $100; do not use amount) ---
+    if any(kw in desc for kw in _DONATION_KEYWORDS):
         return "donation_income"
 
-    # --- Default: membership income (Zelle/PayPal membership payments) ---
+    # --- Default: membership (Zelle/PayPal dues and similar credits) ---
     return "membership_income"
 
 
