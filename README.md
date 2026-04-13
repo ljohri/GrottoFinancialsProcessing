@@ -3,7 +3,7 @@
 Generates a structured annual budget report for the **San Francisco Bay Chapter (SFBC)**
 from Chase, PayPal, and Fidelity financial exports.
 
-Outputs: `output/2025_budget_report.md`, `.pdf`, and `.docx` — all with embedded charts.
+Outputs: `output/<OUTPUT_PREFIX>_budget_report.md`, `.pdf`, and `.docx` — all with embedded charts.
 
 ---
 
@@ -211,9 +211,9 @@ All outputs are written to the `output/` directory:
 
 | File | Description |
 |---|---|
-| `2025_budget_report.md` | Markdown report with relative image links |
-| `2025_budget_report.pdf` | Self-contained PDF with embedded charts |
-| `2025_budget_report.docx` | Word document with embedded charts |
+| `<OUTPUT_PREFIX>_budget_report.md` | Markdown report with relative image links |
+| `<OUTPUT_PREFIX>_budget_report.pdf` | Self-contained PDF with embedded charts |
+| `<OUTPUT_PREFIX>_budget_report.docx` | Word document with embedded charts |
 | `chart_income_vs_expenses.png` | Bar chart: income vs expenses |
 | `chart_monthly_cashflow.png` | Line chart: monthly income, outflows, net |
 | `chart_expense_breakdown.png` | Pie chart: expense categories |
@@ -226,7 +226,7 @@ All outputs are written to the `output/` directory:
 2. **Income Breakdown** — monthly membership income and donations table
 3. **Expense Breakdown** — monthly totals, major expenses with notes, Zelle payments out, full itemized list
 4. **PayPal Summary** — gross received, fees, net
-5. **Fidelity Investments** — 2025 annual performance (gains in $ and %), current holdings table
+5. **Fidelity Investments** — annual performance for the analysis-end year (gains in $ and %), current holdings table
 6. **Notes** — methodology, filters applied, name redaction policy
 7. **Internal Transfers (Excluded)** — appendix listing all detected PayPal↔Chase transfers
 
@@ -238,7 +238,7 @@ All outputs are written to the `output/` directory:
 sfbc_accounts/
 ├── main.py              — entry point
 ├── load_data.py         — CSV loading and normalization
-├── transform.py         — date parsing, amount cleaning, 2025 filter
+├── transform.py         — date parsing, amount cleaning, analysis date range filter
 ├── categorize.py        — transaction categorization
 ├── anonymize.py         — personal name redaction
 ├── expense_notes.py     — Expense Notes.txt parser
@@ -257,8 +257,8 @@ sfbc_accounts/
 │           ├── Investment_income*.xlsx
 │           └── Expense Notes.txt
 └── output/
-    ├── 2025_budget_report.md
-    ├── 2025_budget_report.pdf
-    ├── 2025_budget_report.docx
+    ├── <OUTPUT_PREFIX>_budget_report.md
+    ├── <OUTPUT_PREFIX>_budget_report.pdf
+    ├── <OUTPUT_PREFIX>_budget_report.docx
     └── chart_*.png
 ```

@@ -31,6 +31,7 @@ def _resolved_path(env_key: str, default_relative: str) -> str:
 
 DATA_DIR = _resolved_path("SFBC_INPUT_DIR", "docs/input_docs/2025")
 OUTPUT_DIR = _resolved_path("SFBC_OUTPUT_DIR", "output")
+OUTPUT_PREFIX = Path(OUTPUT_DIR).name or "output"
 
 
 def _parse_date(raw: str) -> date | None:

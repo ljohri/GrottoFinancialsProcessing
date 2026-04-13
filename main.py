@@ -13,6 +13,7 @@ from config import (
     ANALYSIS_START,
     DATA_DIR,
     OUTPUT_DIR,
+    OUTPUT_PREFIX,
     REPORT_PERIOD_LABEL,
 )
 from docx_export import export_docx
@@ -25,9 +26,9 @@ from report import export_markdown, generate_report
 from transform import transform
 
 NOTES_PATH  = os.path.join(DATA_DIR, "Expense Notes.txt")
-REPORT_MD   = os.path.join(OUTPUT_DIR, "2025_budget_report.md")
-REPORT_PDF  = f"{OUTPUT_DIR}/2025_budget_report.pdf"
-REPORT_DOCX = f"{OUTPUT_DIR}/2025_budget_report.docx"
+REPORT_MD   = os.path.join(OUTPUT_DIR, f"{OUTPUT_PREFIX}_budget_report.md")
+REPORT_PDF  = os.path.join(OUTPUT_DIR, f"{OUTPUT_PREFIX}_budget_report.pdf")
+REPORT_DOCX = os.path.join(OUTPUT_DIR, f"{OUTPUT_PREFIX}_budget_report.docx")
 
 
 def main() -> None:

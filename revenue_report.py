@@ -1,14 +1,15 @@
 """Consolidated revenue report across Chase and PayPal accounts.
 
-Produces a full line-item listing of all 2025 income transactions,
+Produces a full line-item listing of income transactions in the configured
+analysis window,
 clearly flagged by source account, with subtotals by source and category.
 
 Run:
     uv run python revenue_report.py
 
 Outputs:
-    output/2025_revenue_consolidated.csv   — machine-readable line items
-    output/2025_revenue_consolidated.txt   — formatted text report
+    output/<OUTPUT_PREFIX>_revenue_consolidated.csv   — machine-readable line items
+    output/<OUTPUT_PREFIX>_revenue_consolidated.txt   — formatted text report
 """
 
 import os
@@ -19,7 +20,7 @@ from tabulate import tabulate
 
 from anonymize import anonymize
 from categorize import categorize
-from config import DATA_DIR, OUTPUT_DIR
+from config import OUTPUT_PREFIX, DATA_DIR, OUTPUT_DIR, REPORT_PERIOD_LABEL
 from load_data import load_all_data
 from transform import transform
 
@@ -124,7 +125,7 @@ def generate_report(revenue: pd.DataFrame) -> str:
 
     # ── Title ──────────────────────────────────────────────────────────────
     lines.append("=" * 80)
-    lines.append("  SFBC 2025 — CONSOLIDATED REVENUE REPORT")
+    lines.append(f"  SFBC {REPORT_PERIOD_LABEL} — CONSOLIDATED REVENUE REPORT")
     lines.append("  All accounts · All line items")
     lines.append("=" * 80)
 
@@ -240,7 +241,7 @@ def export_csv(revenue: pd.DataFrame, path: str) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    print("=== SFBC 2025 Consolidated Revenue Report ===\n")
+    print(f"=== SFBC {REPORT_PERIOD_LABEL} Consolidated Revenue Report ===\n")
 
     print("[1/3] Loading and processing transactions...")
     revenue = build_revenue_df(DATA_DIR)
@@ -256,13 +257,13 @@ def main() -> None:
     report_text = generate_report(revenue)
     print()
 
-    txt_path = os.path.join(OUTPUT_DIR, "2025_revenue_consolidated.txt")
+    txt_path = os.path.join(OUTPUT_DIR, f"{OUTPUT_PREFIX}_revenue_consolidated.txt")
     with open(txt_path, "w", encoding="utf-8") as f:
         f.write(report_text)
     print(f"  Report saved: {txt_path}")
 
     print("[3/3] Exporting CSV...")
-    csv_path = os.path.join(OUTPUT_DIR, "2025_revenue_consolidated.csv")
+    csv_path = os.path.join(OUTPUT_DIR, f"{OUTPUT_PREFIX}_revenue_consolidated.csv")
     export_csv(revenue, csv_path)
 
     print()
